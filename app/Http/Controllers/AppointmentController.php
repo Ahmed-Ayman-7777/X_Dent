@@ -250,7 +250,7 @@ class AppointmentController extends Controller
                 'id' => $appointment->id,
                 'patient' => [
                     'id' => $appointment->patient->id,
-                    'name' => $appointment->patient->detail->name ?? 'N/A',
+                    'name' => $appointment->patient->detail->name ?? $appointment->patient->user->name,
                     'age' => $appointment->patient->detail->age ?? 'N/A',
                     'phone' => $appointment->patient->user->phone ?? 'N/A',
                     'email' => $appointment->patient->user->email ?? 'N/A',

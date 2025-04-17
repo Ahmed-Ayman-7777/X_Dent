@@ -25,7 +25,7 @@ class TreatmentPlanController extends Controller
     //         'treatment_plan' => $treatmentPlan
     //     ], 201);
     // }
-
+    // Doctor Route
     public function getPatientTreatmentPlans(Request $request, $patientId)
     {
         $doctorId = $request->user()->doctor->id; // Get authenticated doctor's ID
@@ -49,7 +49,7 @@ class TreatmentPlanController extends Controller
             'treatment_plans' => $treatmentPlans,
         ]);
     }
-
+    // Doctor Route
     public function createTreatmentPlan(Request $request, $patientId)
     {
         $doctorId = $request->user()->doctor->id; // Get authenticated doctor's ID
@@ -191,6 +191,37 @@ class TreatmentPlanController extends Controller
             'status' => 'success',
             'message' => 'Treatment plan updated successfully.',
             'treatment_plan' => $treatmentPlan
+        ]);
+    }
+
+    // Patient Route
+    public function getAuthPatientTreatmentPlans(Request $request)
+    {
+        $patient = $request->user()->patient;
+
+        if (!$patient) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized or no patient record found.',
+            ], 403);
+        }
+
+        $treatmentPlans = $patient->treatmentPlans()->with('doctor.user')->latest()->get();
+
+        return response()->json([
+            'status' => 'success',
+            'treatment_plans' => $treatmentPlans->map(function ($plan) {
+                return [
+                    'id' => $plan->id,
+                    'name' => $plan->name,
+                    'status' => $plan->status ? 'Completed' : 'Pending',
+                    'date' => $plan->date,
+                    'doctor' => [
+                        'id' => $plan->doctor->id,
+                        'name' => 'Dr. ' . $plan->doctor->user->name,
+                    ],
+                ];
+            }),
         ]);
     }
 }

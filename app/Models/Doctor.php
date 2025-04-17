@@ -96,6 +96,55 @@ class Doctor extends Authenticatable implements JWTSubject
     {
         $query = self::query();
 
+        // Apply specialization name filter
+        if (isset($filters['specialization_names'])) {
+
+            // Get the specialization name(s) from the request
+            $specialization_names = $filters['specialization_names'];
+            // return $specialization_names;
+
+            // If the input is a comma-separated list, split it into an array
+            if (strpos($specialization_names, ',') !== false) {
+                $specialization_names = explode(',', $specialization_names);
+            } else {
+                // If it's a single name, make it an array with one element
+                $specialization_names = [$specialization_names];
+            }
+
+            // Initialize an array to store specialization IDs and missing specializations
+            $specialization_ids = [];
+            $missing_specializations = [];
+
+            // Iterate over each specialization name and find it in the database
+            foreach ($specialization_names as $specialization_name) {
+                // Trim any extra spaces around the name
+                // $specialization_name = trim($specialization_name);
+
+                // Try to find the specialization in the database
+                $_specialization = Specialization::where('name', $specialization_name)->first();
+
+                if ($_specialization) {
+                    // If the specialization exists, add its ID to the array
+                    $specialization_ids[] = $_specialization->id;
+                } else {
+                    // If the specialization does not exist, add it to the missing list
+                    $missing_specializations[] = $specialization_name;
+                }
+            }
+
+            // If there are any missing specializations, return a message for them
+            // if (count($missing_specializations) > 0) {
+            //     return $this->errorResponse([
+            //         'message' => 'The following specializations do not exist: ' . implode(', ', $missing_specializations)
+            //     ], 404);
+            // }
+
+            // Retrieve doctors associated with the found specializations
+            $query->whereHas('specializations', function ($query) use ($specialization_ids) {
+                $query->whereIn('specializations.id', $specialization_ids);
+            })->get();
+        }
+
         if (isset($filters['review_rating'])) {
             $query->whereHas('reviews', function ($query) use ($filters) {
                 $query->selectRaw('AVG(rating) as average_rating')
@@ -113,6 +162,8 @@ class Doctor extends Authenticatable implements JWTSubject
         if (isset($filters['max_price'])) {
             $query->where('price', '<=', $filters['max_price']);
         }
+
+
 
         return $query;
     }

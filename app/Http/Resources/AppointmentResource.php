@@ -22,7 +22,7 @@ class AppointmentResource extends JsonResource
             'status' => $this->status,
             'appointment_date' => $this->appointment_date,
             'appointment_time' => $this->appointment_time,
-            'patient' => new PatientDetailResource($this->patient->detail), // Include patient details
+            'patient' => new PatientDetailResource($this->patient->detail), //new PatientResource($this->patient->user), // Include patient details
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
         ];

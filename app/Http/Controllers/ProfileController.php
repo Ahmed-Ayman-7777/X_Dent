@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\DoctorResource;
+use App\Http\Resources\PatientResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    public function updateDoctorProfile(Request $request)
+    public function updateProfile(Request $request)
     {
         $user = $request->user();
         // Validate incoming data
@@ -32,7 +34,34 @@ class ProfileController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Profile updated successfully',
-            'doctor' => new DoctorResource($user),
+            'doctor' => $user->role == "doctor" ? new DoctorResource($user) : new PatientResource($user),
+        ]);
+    }
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        // Validate inputs
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        // Check if current password is correct
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Current password is incorrect.',
+            ], 403);
+        }
+
+        // Update to new password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password updated successfully.',
         ]);
     }
 }

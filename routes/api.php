@@ -76,7 +76,8 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
 
 
-
+    Route::put('profile/edit', [ProfileController::class, 'updateProfile']);
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword']);
 
 
 
@@ -103,7 +104,6 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Profile
         Route::get('doctor/patient_list', [DoctorController::class, "getDoctorPatients"]);
         Route::get('/doctor/patient_list/{id}', [DoctorController::class, 'getPatientById']);
-        Route::put('/doctor/profile/edit', [ProfileController::class, 'updateDoctorProfile']);
 
         // Treatment Plan
         Route::get('/doctor/patient/{id}/treatment-plans', [TreatmentPlanController::class, 'getPatientTreatmentPlans']);
@@ -146,6 +146,9 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         Route::get('/patient/details', [ControllersPatientController::class, 'show']);
         Route::post('/patient/details', [ControllersPatientController::class, 'store']);
         Route::post('/patient/details/update', [ControllersPatientController::class, 'update']);
+
+        // Patient Treatmentplan
+        Route::get('/patient/treatment-plans', [TreatmentPlanController::class, 'getAuthPatientTreatmentPlans']);
     });
 
 

@@ -50,15 +50,11 @@ class DoctorController extends Controller
 
     public function filter(Request $request)
     {
-        $filters = $request->only(['review_rating', 'min_price', 'max_price']);
+        $filters = $request->only(['review_rating', 'min_price', 'max_price', 'specialization_names']);
 
         // Use the filter method from the Doctor model
         $doctors = Doctor::filter($filters)->get();
 
-        // return response()->json([
-        //     'status' => 'success',
-        //     'data' => $doctors
-        // ], 200);
         $users = [];
         foreach ($doctors as $doctor) {
             $user = $doctor->user;
@@ -128,7 +124,7 @@ class DoctorController extends Controller
             'patients' => $patients->map(function ($patient) {
                 return [
                     'id' => $patient->id,
-                    'name' => $patient->detail->name ?? 'Unknown', // Get name from patient_details
+                    'name' => $patient->detail->name ?? $patient->user->name, // Get name from patient_details
                     'apppointment_date' => $patient->appointments->first()->appointment_date ?? null, // Get last appointment
                 ];
             }),
@@ -166,7 +162,7 @@ class DoctorController extends Controller
             'status' => 'success',
             'patient' => [
                 'id' => $patient->id,
-                'name' => $patient->detail->name ?? 'Unknown', // Get name from patient_details
+                'name' => $patient->detail->name ?? $patient->user->name, // Get name from patient_details
                 'age' => $patient->detail->age ?? 'N/A',
                 'phone' => $patient->user->phone ?? 'Not Provided',
                 'email' => $patient->user->email ?? 'Not Provided',
