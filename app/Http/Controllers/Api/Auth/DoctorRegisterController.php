@@ -39,6 +39,7 @@ class DoctorRegisterController extends Controller
             'university' => $request->university,
             'year_graduated' => $request->year_graduated,
             'location' => $request->location,
+            'price' => $request->price,
             // 'cv_file' => null, // Save file path in the database
         ]);
 

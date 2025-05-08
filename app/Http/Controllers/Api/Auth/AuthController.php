@@ -13,6 +13,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use App\ApiResponseTrait; // Import the trait
 use App\Http\Resources\DoctorResource;
 use App\Http\Resources\PatientResource;
+use App\Notifications\ForgetPasswordNotificatoin;
 use PatientController;
 
 class AuthController extends Controller
@@ -44,6 +45,7 @@ class AuthController extends Controller
                 return $this->respondWithToken($token, new PatientResource($user));
             } else {
                 //$user = User::with('doctor')->find($user->id);
+                //$user->notify(new ForgetPasswordNotificatoin());
                 return $this->respondWithToken($token, new DoctorResource($user));
             }
 

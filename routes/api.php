@@ -6,13 +6,16 @@ use App\Http\Controllers\Api\Auth\PatientRegisterController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PatientController as ControllersPatientController;
 use App\Http\Controllers\PostFolder\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TreatmentPlanController;
+use App\Http\Requests\ForgotPasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +40,9 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
+    Route::post('forgot-password/code', [ForgotPasswordController::class, 'otpChecking']);
+    Route::post('reset-password', [ResetPasswordController::class, 'resetPassword']);
 });
 
 

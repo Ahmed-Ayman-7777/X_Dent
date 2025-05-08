@@ -16,7 +16,7 @@ class PatientFactory extends Factory
     public function definition()
     {
         return [
-            'description' => $this->faker->paragraph, // Random description text
+            //'description' => $this->faker->paragraph, // Random description text
             'user_id' => User::factory()->create([
                 'role' => 'patient'
             ]), // Generate a random user_id using the User factory

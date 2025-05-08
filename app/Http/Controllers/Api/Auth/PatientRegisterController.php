@@ -25,7 +25,7 @@ class PatientRegisterController extends Controller
 
         $patient = Patient::create([
             'user_id' => $user->id,
-            'description' => $request->description,
+            //'description' => $request->description,
         ]);
 
         // $patient = User::with('patient')->find($user->id);
