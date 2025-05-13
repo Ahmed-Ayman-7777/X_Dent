@@ -15,6 +15,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TreatmentPlanController;
+use App\Http\Controllers\XrayController;
 use App\Http\Requests\ForgotPasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +66,7 @@ Route::group(['prefix' => 'auth'], function () {
 Route::get('patients', [DoctorController::class, 'getAllPatients']);
 Route::get('doctors', [DoctorController::class, 'getAllDoctors']);
 Route::get('doctors/filter', [DoctorController::class, 'filter']);
+Route::get('run-db-seed', [DoctorController::class, 'runCommand']);
 
 
 
@@ -155,6 +157,13 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
         // Patient Treatmentplan
         Route::get('/patient/treatment-plans', [TreatmentPlanController::class, 'getAuthPatientTreatmentPlans']);
+
+        // X-Ray
+
+        Route::post('/xray/upload', [XrayController::class, 'uploadXray']);
+        Route::get('/patient/xrays', [XrayController::class, 'getAuthPatientXrays']);
+        Route::post('/xray/reupload/{id}', [XrayController::class, 'reuploadXrayImage']);
+        Route::get('/patient/xray/{id}', [XrayController::class, 'showXrayById']);
     });
 
 

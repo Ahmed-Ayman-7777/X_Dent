@@ -16,6 +16,7 @@ use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 class DoctorController extends Controller
 {
@@ -176,6 +177,16 @@ class DoctorController extends Controller
                 //     ];
                 // }),
             ],
+        ]);
+    }
+
+    public function runCommand()
+    {
+        Artisan::call('db:seed');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database seeding executed successfully.',
         ]);
     }
 }
