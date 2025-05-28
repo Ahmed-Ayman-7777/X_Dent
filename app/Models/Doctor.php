@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class Doctor extends Authenticatable implements JWTSubject
 {
@@ -212,5 +214,27 @@ class Doctor extends Authenticatable implements JWTSubject
         }
 
         return $availableDays;
+    }
+    protected $searchable = [
+        'user.first_name',
+        'user.last_name',
+        'specializations.name',
+    ];
+    public function scopeSearch(Builder $builder, $term = '')
+    {
+        foreach ($this->searchable as $searchItem) {
+
+            if (str_contains($searchItem, '.')) {
+                $relation = Str::beforeLast($searchItem, '.');
+                $column = Str::afterLast($searchItem, '.');
+
+                $builder->orWhereRelation($relation, $column, 'like', "%$term%");
+                continue;
+            }
+
+            $builder->orWhere($searchItem, 'like', "%$term%");
+        }
+
+        return $builder;
     }
 }

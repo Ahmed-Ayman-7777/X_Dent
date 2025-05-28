@@ -169,6 +169,9 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         Route::get('/patient/xrays', [XrayController::class, 'getAuthPatientXrays']);
         Route::post('/xray/reupload/{id}', [XrayController::class, 'reuploadXrayImage']);
         Route::get('/patient/xray/{id}', [XrayController::class, 'showXrayById']);
+
+        // Search
+        Route::get('/patient/doctor/search', [DoctorController::class, 'patientSearchForDoctor']);
     });
 
 
