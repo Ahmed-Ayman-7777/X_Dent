@@ -21,15 +21,6 @@ class SpecializationController extends Controller
 
     public function getDoctorBySpecializationName(Request $request)
     {
-        // // Validate the input for specialization names
-        // $validator = Validator::make($request->all(), [
-        //     'name' => ['required', 'string', 'max:255']
-        // ]);
-
-        // // If validation fails, return a validation error response
-        // if ($validator->fails()) {
-        //     return $this->validationErrorResponse($validator->errors());
-        // }
 
         // Get the specialization name(s) from the request
         $specialization_names = $request->name;
@@ -83,5 +74,25 @@ class SpecializationController extends Controller
 
         // Return the list of doctors with their associated specializations
         return $this->successResponse($result);
+    }
+
+    public function createSpecializationsList(Request $request)
+    {
+
+        $request->validate([
+            'specializations' => 'required|array',
+            'specializations.*' => 'required|string|max:255',
+        ]);
+
+        $created = [];
+
+        foreach ($request->specializations as $name) {
+            $created[] = Specialization::firstOrCreate(['name' => $name]);
+        }
+
+        return response()->json([
+            'message' => 'Specializations created successfully',
+            'data' => $created,
+        ], 201);
     }
 }

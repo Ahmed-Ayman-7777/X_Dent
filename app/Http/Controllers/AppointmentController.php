@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\PatientAppointmentResource;
 use App\Models\Appointment;
+use App\Models\Patient;
 use App\Models\Schedule;
 use App\Models\TreatmentPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AppointmentController extends Controller
 {
@@ -241,7 +243,7 @@ class AppointmentController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Appointment not found or unauthorized access.'
-            ], 404);
+            ], 403);
         }
 
         return response()->json([
@@ -267,6 +269,70 @@ class AppointmentController extends Controller
                     'date' => $appointment->treatmentPlan->date,
                 ] : null,
             ]
+        ]);
+    }
+
+    public function getDoctorAppointmentPaymentDetails(Request $request, $appointmentId)
+    {
+        $doctor = $request->user()->doctor; // Get authenticated doctor
+
+        $appointment = Appointment
+            ::where('doctor_id', $doctor->id) // Ensure it's this doctor's appointment
+            ->find($appointmentId);
+
+        if (!$appointment) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Appointment not found or unauthorized access.'
+            ], 403);
+        }
+        $refference = $appointment->id . '00001234';
+        return response()->json([
+            'status' => 'success',
+            'appointments' => [
+                'id' => $appointment->id,
+                'recipent' => $appointment->doctor->user->name,
+                'refference' => $refference,
+                'payment_method' => 'mastercard'
+            ]
+        ]);
+    }
+
+    // Profile
+    public function getDoctorPatientUpcomingAppointments(Request $request, $id)
+    {
+        $doctor = $request->user()->doctor; // Get authenticated doctor
+
+        $patient = Patient::whereHas('appointments', function ($q) use ($doctor, $id) {
+            $q->where('doctor_id', $doctor->id)
+                ->where('patient_id', $id);
+        })->first();
+
+        if (!$patient) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Patient not found or unauthorized access.'
+            ], 403);
+        }
+        $appointments = Appointment::where('patient_id', $patient->id)
+            ->where('status', 'pending')
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'patient' => $appointments->map(function ($appoint) {
+                return [
+                    'id' => $appoint->patient->id,
+                    'day' => $appoint->day,
+                    'status' => $appoint->status,
+                    'treatment_name' => $appoint->treatmentplan->name,
+                    'appointment_date' => $appoint->appointment_date,
+                    'appointment_time' => $appoint->appointment_time,
+                    'created_at' => $appoint->created_at->toDateTimeString(),
+                    'updated_at' => $appoint->updated_at->toDateTimeString(),
+                ];
+            })
         ]);
     }
 }

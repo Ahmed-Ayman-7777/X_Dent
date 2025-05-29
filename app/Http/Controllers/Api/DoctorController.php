@@ -13,6 +13,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Schedule;
+use App\Models\Specialization;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -31,11 +32,13 @@ class DoctorController extends Controller
     }
     public function userSpecialization(Request $request)
     {
-        $user = $request->user();
-        $user = User::with('doctor.specializations')->find($user->id);
-        $doctor = $user->doctor;
+        // $user = $request->user();
+        // $user = User::with('doctor.specializations')->find($user->id);
+        // $doctor = $user->doctor;
+
+        $specializations = Specialization::get();
         return response()->json([
-            'doctor' => $user,
+            'specializations' => $specializations,
         ]);
     }
     public function getAllDoctors()
