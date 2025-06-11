@@ -101,6 +101,7 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Xray
         Route::get('doctor/patient/{id}/xrays', [XrayController::class, "getDoctorPatientXrays"]);
         Route::get('doctor/xray/{id}', [XrayController::class, "showXrayByIdForDoctor"]);
+        Route::post('/xray/reupload/{id}', [XrayController::class, 'reuploadXrayImage']);
 
         // Specializations
         Route::get('specializations', [SpecializationController::class, 'getAllSpecialization']);
@@ -169,7 +170,6 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
         Route::post('/xray/upload', [XrayController::class, 'uploadXray']);
         Route::get('/patient/xrays', [XrayController::class, 'getAuthPatientXrays']);
-        Route::post('/xray/reupload/{id}', [XrayController::class, 'reuploadXrayImage']);
         Route::get('/patient/xray/{id}', [XrayController::class, 'showXrayById']);
 
         // Search

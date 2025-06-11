@@ -63,6 +63,9 @@ class XrayController extends Controller
 
     public function reuploadXrayImage(Request $request, $id)
     {
+        // Allow for 5 minutes of execution time
+        set_time_limit(300);
+
         $xray = Xray::find($id);
 
         if (!$xray || !Storage::disk('public')->exists($xray->image_path)) {
@@ -82,16 +85,44 @@ class XrayController extends Controller
         // }
 
         // Send image to upload route (e.g., /api/xray/upload)
-        $response = Http::withToken($request->token)
+        $response = Http::timeout(300)  // Timeout after 60 seconds for each attempt
             ->attach(
-                'image',
+                'file',
                 file_get_contents($imagePath),
                 basename($imagePath)
-            )->post('https://laravelproject-production-d279.up.railway.app/api/xray/upload');
+            )->post('https://dental-xray-yolov11-api.onrender.com/detect');
 
-        return response()->json([
-            'status' => $response->json(),
-        ]);
+        // Check if the response is successful
+        if ($response->successful()) {
+            // Get the image data (raw binary)
+            $imageData = $response->body();
+
+            // Get the original image extension (you may want to use the same as input)
+            $extension = 'jpg';  // Default extension if not returned by API, change as needed.
+
+            // Generate a unique name for the image
+            $imageName = 'xray_' . time() . '.' . $extension;
+
+            // Store the image in the 'xrays' folder in the 'public' disk
+            $imagePath = 'xrays/' . $imageName;
+            Storage::disk('public')->put($imagePath, $imageData);
+
+            // Generate the URL for the stored image
+            $imageUrl = asset('storage/' . $imagePath);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'X-ray image re-uploaded successfully.',
+                'image_url' => $imageUrl,  // URL to access the image
+                'image_name' => $imageName,  // Image name with extension
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to re-upload X-ray image.',
+                'api_error' => $response->body()  // API error message
+            ], $response->status());
+        }
     }
     public function showXrayById(Request $request, $id)
     {
